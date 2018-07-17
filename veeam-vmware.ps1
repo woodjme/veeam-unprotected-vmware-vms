@@ -8,8 +8,8 @@ Import-Module VMware.PowerCLI
 ###
 # Configuration
 ##
-$vcenters = @("0.0.0.0", "0.0.0.0")
-$veeamServers = @("0.0.0.0", "0.0.0.0")
+$vcenters = @("185.53.29.7", "185.53.29.8")
+$veeamServers = @("185.53.29.6", "185.53.29.22")
 $credential = Get-Credential
 
 # Get virtual machines from VMWare
@@ -17,6 +17,12 @@ Connect-VIServer -Server $vcenters -Credential $credential
 $virtualmachines = @()
 foreach ($vm in (Get-VM | Where-Object {$_.PowerState -eq "PoweredOn"})) {
 	$virtualmachines += $vm.Name
+}
+
+# Get a list of virtual machines that do not require a backup
+$excludedMachines = @()
+foreach ($vm in (Get-VM -Tag "Backup Not Required" | Where-Object {$_.PowerState -eq "PoweredOn"})) {
+	$excludedMachines += $vm.name
 }
 
 # Get a list of protected virtual machines from Veeam
@@ -32,9 +38,13 @@ foreach ($veeamServer in $veeamServers) {
 
 # Print List
 foreach ($vm in $virtualmachines) {
-	if ($protectedvms.Contains($vm)) {
-		Write-Host -ForegroundColor Green "Backup found for $vm"
+	if ($protectedvms.Contains($vm) -And $excludedMachines.Contains($vm)) {
+		Write-Host -ForegroundColor Yellow "$vm - is protected, but should be excluded"
+	} elseif ( -Not $protectedvms.Contains($vm) -And $excludedMachines.Contains($vm)){
+		Write-Host -ForegroundColor DarkGreen "$vm - is not protected and shouldn't be"
+	} elseif (-Not $protectedvms.Contains($vm)) {
+		Write-Host  -ForegroundColor Red "$vm - is not backed up and should be"
 	} else {
-		Write-Host -ForegroundColor Red "No Backup found for $vm"
+		Write-Host -ForegroundColor Green "$vm - is backed up and should be"
 	}
 }
