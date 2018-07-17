@@ -11,6 +11,15 @@ $veeamServers = @("0.0.0.0", "0.0.0.0")
 
 ## Run
 
+### Parameters
+
 ```powershell
-powershell.exe ./veeam-vmware.ps1
+Param(
+  [Boolean]$showProtected, # Hide protected VM's. OPTIONAL.
+  [String]$noBackupTag # The name of the tag used in VMware to declare that the VM does not been to be protected. OPTIONAL.
+)
+```
+
+```powershell
+ .\vmware.ps1 -showProtected $true -noBackupTag "Backup Not Required"
 ```
