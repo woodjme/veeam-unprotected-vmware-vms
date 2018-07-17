@@ -8,8 +8,8 @@ Import-Module VMware.PowerCLI
 ###
 # Configuration
 ##
-$vcenters = @("185.53.29.7", "185.53.29.8")
-$veeamServers = @("185.53.29.6", "185.53.29.22")
+$vcenters = @("0.0.0.0", "0.0.0.0")
+$veeamServers = @("0.0.0.0", "0.0.0.0")
 $credential = Get-Credential
 
 # Get virtual machines from VMWare
